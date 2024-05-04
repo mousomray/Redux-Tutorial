@@ -3,6 +3,6 @@ import userDetail from "../features/userDetailSlice";
 
 export const store = configureStore({
     reducer: {
-        app: userDetail,
+        app: userDetail, // Use can create multiple reducer 
     },
 });

@@ -73,11 +73,12 @@ const Login = () => {
                 if (response.payload && response.payload.status === 200) {
 
                     // Store user data and token in local storage
-                    
+
+                    // Akhane joto guli data ache (In local storage handle) sab e ache jehetu api te data ache bole. data r jaygay jodi user ba onno kichu thakto tahole data r jaygay amra seta likhtam
                     const { data, token } = response.payload;
-                    setAuth({ user: data, token }); // data is present in api so I use, user:data if user is present in api then I will do user:user
+                    setAuth({ user: data, token });
                     localStorage.setItem("auth", JSON.stringify({ user: data, token }));
-                    
+
                     // Local storage end
 
                     navigate('/');

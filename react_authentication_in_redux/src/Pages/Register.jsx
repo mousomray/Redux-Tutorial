@@ -4,6 +4,14 @@ import { useSelector, useDispatch } from 'react-redux'
 import { register } from '../features/userDetailSlice'
 import { useNavigate } from 'react-router-dom'
 
+const myobjects = {
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    profile_pic: ''
+}
+
 const Register = () => {
 
     const [reg, setReg] = useState([]);
@@ -22,7 +30,18 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await dispatch(register(reg));
+
+            // For to Handle Form data
+            let formdata = new FormData();
+            formdata.append("first_name", reg.first_name);
+            formdata.append("last_name", reg.last_name);
+            formdata.append("email", reg.email);
+            formdata.append("password", reg.password);
+            formdata.append("profile_pic", image);
+
+            // Because it is a form data so I put formdata in () for raw data you put reg in () which is piller of useState
+
+            const response = await dispatch(register(formdata));
             if (response.payload && response?.payload.status === 200) {
                 navigate("/login");
             }
@@ -56,7 +75,7 @@ const Register = () => {
                     {/*This form section is for the submit image*/}
                     <div style={{ marginBottom: '20px' }}>
                         <input type="file" onChange={(e) => setImage(e.target.files[0])} name="image" accept="image/*" className="form-control" />
-                        
+
                         {image !== "" && image !== undefined && image !== null ? (
                             <img style={{ height: "180px" }} src={URL.createObjectURL(image)} alt="" className="upload-img" />
                         ) : (
@@ -65,7 +84,7 @@ const Register = () => {
                     </div>
                     {/*Image area end*/}
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none', background: '#007bff', color: '#fff' }}>
-                        {loading?'Loading...':'Register'}
+                        {loading ? 'Loading...' : 'Register'}
                     </button>
                 </form>
 

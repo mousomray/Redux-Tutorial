@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Product from './Pages/Product'
 import Categorydetails from './Pages/Categorydetails'
 import Productdetails from "./Pages/Productdetails"
+import Cart from './Pages/Cart'
 
 
 const App = () => {
@@ -19,6 +20,10 @@ const App = () => {
     {
       path: '/productdetails/:id',
       component: <Productdetails />
+    },
+    {
+      path: '/cart',
+      component: <Cart/>
     }
 
   ]

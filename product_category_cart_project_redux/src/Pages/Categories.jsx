@@ -35,8 +35,8 @@ const Categories = () => {
                 {categories?.map((value) => {
                     return (
                         <>
-                            <Link key={value} style={{ textDecoration: 'none' }} to={`/categorydetails/${value}`}>
-                                <li>{value}</li>
+                            <Link key={value} style={{ textDecoration: 'none' }} to={`/categorydetails/${value.slug}`}>
+                                <li>{value.name}</li>
                             </Link>
                         </>
                     )

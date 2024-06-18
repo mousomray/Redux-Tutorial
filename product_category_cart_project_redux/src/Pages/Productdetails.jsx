@@ -1,24 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from '@tanstack/react-query' // Import for useQuery 
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { detailsproduct } from "../features/prodetails"
+import { detailsproduct } from "../apicall/productapicall"
 import Layout from "../Common/Layout"
 
 
 const Details = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
-    
 
-    const { singleproduct, loading } = useSelector((state) => state.pdetails);
 
-    useEffect(() => {
-        dispatch(detailsproduct(id));
-    }, []);
+    // Get Single Product For Use Query 
+    const getSingleproductdata = async () => {
+        const response = await dispatch(detailsproduct(id)) // Call Showproduct function
+        return response?.payload
+    }
 
-    if (loading) {
+    // Use Query Area
+    const { isLoading, isError, data: singleproductdata, error, refetch } = useQuery({
+        queryKey: ['singleproduct'],
+        queryFn: getSingleproductdata // This line of code work as same as useEffect()
+    })
+
+    if (isLoading) {
         return (
-            <div class="spinner-grow text-primary" role="status" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize:'100000px'}}>
+            <div class="spinner-grow text-primary" role="status" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '100000px' }}>
                 <span class="sr-only">Loading...</span>
             </div>
         );
@@ -34,12 +41,12 @@ const Details = () => {
                         <div style={{ width: '50%' }}>
                             <div id="productCarousel" className="carousel slide" data-ride="carousel">
                                 <ol className="carousel-indicators">
-                                    {singleproduct?.images?.map((image, index) => (
+                                    {singleproductdata?.images?.map((image, index) => (
                                         <li key={index} data-target="#productCarousel" data-slide-to={index} className={index === 0 ? 'active' : ''}></li>
                                     ))}
                                 </ol>
                                 <div className="carousel-inner">
-                                    {singleproduct?.images?.map((image, index) => (
+                                    {singleproductdata?.images?.map((image, index) => (
                                         <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
                                             <img src={image} className="d-block w-100" style={{ height: '300px', objectFit: 'cover' }} alt='' />
                                         </div>
@@ -58,11 +65,11 @@ const Details = () => {
                         <div style={{ width: '50%', paddingLeft: '20px' }}>
                             <div className="card">
                                 <div className="card-body">
-                                    <h5 className="card-title" style={{ color: 'blue' }}>Title: {singleproduct.title}</h5>
-                                    <h6 className="card-subtitle mb-2 text-muted">Description: {singleproduct.description}</h6>
-                                    <p className="card-text">Price: {singleproduct.price}</p>
-                                    <p className="card-text">Rating: {singleproduct.rating}</p>
-                                    <p className="card-text">Stock: {singleproduct.stock}</p>
+                                    <h5 className="card-title" style={{ color: 'blue' }}>Title: {singleproductdata.title}</h5>
+                                    <h6 className="card-subtitle mb-2 text-muted">Description: {singleproductdata.description}</h6>
+                                    <p className="card-text">Price: {singleproductdata.price}</p>
+                                    <p className="card-text">Rating: {singleproductdata.rating}</p>
+                                    <p className="card-text">Stock: {singleproductdata.stock}</p>
                                 </div>
                             </div>
                         </div>

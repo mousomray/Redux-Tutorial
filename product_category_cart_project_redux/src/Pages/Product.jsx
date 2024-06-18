@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useQuery } from '@tanstack/react-query' // Import for useQuery 
 import { Link } from "react-router-dom";
-import { addToCart } from "../features/cartslice";
-import { showProduct } from "../features/productDetailsslice";
+import { addToCart } from "../apicall/cartslice";
+import { showproduct } from "../apicall/productapicall";
 import Layout from "../Common/Layout";
 
 // Loading Skeleton 
@@ -21,6 +22,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import { Button, CardActionArea, CardActions } from '@mui/material';
 import Categories from "./Categories";
+import { Pagination } from "@mui/material";
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -32,15 +34,33 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const Product = () => {
     const dispatch = useDispatch();
-    const [visibleCards, setVisibleCards] = useState(6);
-    const { products, loading } = useSelector((state) => state.product);
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 3;
 
-    useEffect(() => {
-        dispatch(showProduct());
-    }, [dispatch]);
 
-    const handleLoadMore = () => {
-        setVisibleCards(prevVisibleCards => prevVisibleCards + 6);
+    // Get Product For Use Query 
+    const getProductdata = async () => {
+        const response = await dispatch(showproduct()) // Call showproduct function
+        return response?.payload
+    }
+
+    // Use Query Area
+    const { isLoading, isError, data: productdata, error, refetch } = useQuery({
+        queryKey: ['product'],
+        queryFn: getProductdata // This line of code work as same as useEffect()
+    })
+
+    console.log("Product data response", productdata);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(productdata?.length / itemsPerPage);
+
+    // Get current page data
+    const currentPageData = productdata?.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    // handle For Page Change
+    const handleChangePage = (event, value) => {
+        setPage(value);
     };
 
     const handleAddToCart = (product) => {
@@ -56,11 +76,11 @@ const Product = () => {
                             <Grid item xs={12} sm={4}>
                                 <Item>
                                     {/* Display Skeleton or Categories */}
-                                    {loading ? <Skeleton height={200} count={5} /> : <Categories />}
+                                    {isLoading ? <Skeleton height={200} count={5} /> : <Categories />}
                                 </Item>
                             </Grid>
                             <Grid container item xs={12} sm={8} spacing={2}>
-                                {loading ? (
+                                {isLoading ? (
                                     // Display Skeletons while loading
                                     Array.from(Array(10).keys()).map((index) => (
                                         <Grid key={index} item xs={12} sm={6} md={4}>
@@ -71,13 +91,13 @@ const Product = () => {
                                     ))
                                 ) : (
                                     // Display actual products
-                                    products?.slice(0, visibleCards).map((value, index) => (
+                                    currentPageData?.map((value, index) => (
                                         <Grid key={index} item xs={12} sm={6} md={4}>
-                                            <Card sx={{ maxWidth: 345, flexGrow: 1 }}>
+                                            <Card sx={{ maxWidth: 345, flexGrow: 1, height: 500 }}>
                                                 <CardActionArea>
                                                     <CardMedia
                                                         component="img"
-                                                        height="140"
+                                                        height="200"
                                                         image={value?.thumbnail}
                                                         alt="product thumbnail"
                                                     />
@@ -106,12 +126,17 @@ const Product = () => {
                                 )}
                             </Grid>
                         </Grid>
+
+                        {/* Pagination Indicator*/}
+                        <Pagination
+                            count={totalPages}
+                            page={page}
+                            onChange={handleChangePage}
+                            color="primary"
+                            style={{ display: 'flex', justifyContent: 'center' }}
+                        />
+
                     </Box>
-                    {visibleCards < products.length && (
-                        <div className="text-center mt-5">
-                            <button className="btn btn-primary" onClick={handleLoadMore}>Load More</button>
-                        </div>
-                    )}
                 </div>
             </Layout>
         </>

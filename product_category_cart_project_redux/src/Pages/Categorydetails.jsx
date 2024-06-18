@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query' // Import for useQuery 
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { cdetails } from '../features/categoryfilter';
+import { categorydetails } from '../apicall/productapicall';
 import { Link } from 'react-router-dom';
-import { addToCart } from "../features/cartslice";
+import { addToCart } from "../apicall/cartslice";
 
 // Loading Skeleton 
 import Skeleton from 'react-loading-skeleton';
@@ -22,6 +23,7 @@ import Typography from '@mui/material/Typography';
 import { Button, CardActionArea, CardActions } from '@mui/material';
 import Categories from './Categories';
 import Layout from '../Common/Layout';
+import { Pagination } from "@mui/material";
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -35,12 +37,34 @@ const Categorydetails = () => {
 
     const dispatch = useDispatch();
     const { category } = useParams();
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 3;
 
-    const { myfilter, loading } = useSelector((state) => state.cfilter);
 
-    useEffect(() => {
-        dispatch(cdetails(category));
-    }, [category]); // I pass category here for to avoid page refreshing
+    // Get Single Product For Use Query 
+    const getCategorydetails = async () => {
+        const response = await dispatch(categorydetails(category)) // Call Showproduct function
+        return response?.payload
+    }
+
+    // Use Query Area
+    const { isLoading, isError, data: categoryproductdata, error, refetch } = useQuery({
+        queryKey: ['categoryproduct', category],
+        queryFn: getCategorydetails // This line of code work as same as useEffect()
+    })
+
+    console.log("My cat", categoryproductdata);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(categoryproductdata?.length / itemsPerPage);
+
+    // Get current page data
+    const currentPageData = categoryproductdata?.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    // handle For Page Change
+    const handleChangePage = (event, value) => {
+        setPage(value);
+    };
 
     const handleAddToCart = (product) => {
         dispatch(addToCart(product));
@@ -58,7 +82,7 @@ const Categorydetails = () => {
                                 </Item>
                             </Grid>
                             <Grid container item xs={12} sm={8} spacing={2}>
-                                {loading ? (
+                                {isLoading ? (
                                     // Display Skeletons while loading
                                     Array.from(Array(10).keys()).map((index) => (
                                         <Grid key={index} item xs={12} sm={6} md={4} style={{ display: 'flex' }}>
@@ -69,14 +93,14 @@ const Categorydetails = () => {
                                     ))
                                 ) : (
                                     // Display actual products
-                                    myfilter?.map((value, index) => {
+                                    currentPageData?.map((value, index) => {
                                         return (
                                             <Grid key={index} item xs={12} sm={6} md={4}>
-                                                <Card sx={{ maxWidth: 345, flexGrow: 1 }}>
+                                                <Card sx={{ maxWidth: 345, flexGrow: 1, height: 500 }}>
                                                     <CardActionArea>
                                                         <CardMedia
                                                             component="img"
-                                                            height="140"
+                                                            height="200"
                                                             image={value?.thumbnail}
                                                             alt="product thumbnail"
                                                         />
@@ -106,6 +130,16 @@ const Categorydetails = () => {
                                 )}
                             </Grid>
                         </Grid>
+
+                        {/* Pagination Indicator*/}
+                        <Pagination
+                            count={totalPages}
+                            page={page}
+                            onChange={handleChangePage}
+                            color="primary"
+                            style={{ display: 'flex', justifyContent: 'center' }}
+                        />
+
                     </Box>
                 </div>
             </Layout>

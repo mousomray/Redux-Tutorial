@@ -1,18 +1,28 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query' // Import for useQuery 
 import { useSelector, useDispatch } from 'react-redux';
-import { showCategories } from '../features/categoryDetailsslice';
+import { showcategories } from '../apicall/productapicall';
 import { Link } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 
 const Categories = () => {
     const dispatch = useDispatch();
-    const { categories, loading } = useSelector((state) => state.category);
+    
+    // Get Product For Use Query 
+    const getCategoriesdata = async () => {
+        const response = await dispatch(showcategories()) // Call Showproduct function
+        return response?.payload
+    }
 
-    useEffect(() => {
-        dispatch(showCategories());
-    }, []);
+    // Use Query Area
+    const { isLoading, isError, data: categoriesdata, error, refetch } = useQuery({
+        queryKey: ['categories'],
+        queryFn: getCategoriesdata // This line of code work as same as useEffect()
+    })
 
-    if (loading) {
+    
+    
+    if (isLoading) {
         // Display Skeleton while loading
         return (
             <div style={{ fontSize: '20px' }}>
@@ -32,7 +42,7 @@ const Categories = () => {
             <h1>Categories</h1>
             <ul>
                 <Link to="/" style={{ textDecoration: 'none' }}><li>All</li></Link>
-                {categories?.map((value) => {
+                {categoriesdata?.map((value) => {
                     return (
                         <>
                             <Link key={value} style={{ textDecoration: 'none' }} to={`/categorydetails/${value.slug}`}>

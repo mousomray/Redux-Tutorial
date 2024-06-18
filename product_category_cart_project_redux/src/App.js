@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query' // For React Query
 import Product from './Pages/Product'
 import Categorydetails from './Pages/Categorydetails'
 import Productdetails from "./Pages/Productdetails"
@@ -7,6 +8,9 @@ import Cart from './Pages/Cart'
 
 
 const App = () => {
+
+  // Create Query Client For React Query
+  const queryClient = new QueryClient()
 
   const private_routing = [
     {
@@ -23,7 +27,7 @@ const App = () => {
     },
     {
       path: '/cart',
-      component: <Cart/>
+      component: <Cart />
     }
 
   ]
@@ -31,18 +35,23 @@ const App = () => {
 
   return (
     <>
-      <Router>
 
-        <Routes>
-          {private_routing?.map((routing) => {
-            return (
-              <>
-                <Route path={routing?.path} element={routing?.component} />
-              </>
-            )
-          })}
-        </Routes>
-      </Router>
+      {/*Cover with QueryClientProvider*/}
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Routes>
+            {private_routing?.map((routing) => {
+              return (
+                <>
+                  <Route path={routing?.path} element={routing?.component} />
+                </>
+              )
+            })}
+          </Routes>
+        </Router>
+      </QueryClientProvider>
+
+
     </>
   )
 }

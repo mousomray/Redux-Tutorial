@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { removeCartItem, incrementQuantity, decrementQuantity } from '../features/cartslice';
+import { removeCartItem, incrementQuantity, decrementQuantity } from '../apicall/cartslice';
 import Layout from '../Common/Layout';
 
 const Cart = () => {

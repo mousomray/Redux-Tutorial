@@ -1,10 +1,11 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../api/api"
+import { myendpoints } from "../api/endpoints";
 
 // Call Api for All Product
 export const allproduct = createAsyncThunk("allproduct", async (_, { rejectWithValue }) => {
     try {
-        const apiurl = 'products?skip=0&limit=100'
+        const apiurl = myendpoints[0]
         const response = await axiosInstance.get(apiurl);
         console.log("Fetching All Product data", response);
         return response?.data?.products
@@ -17,7 +18,7 @@ export const allproduct = createAsyncThunk("allproduct", async (_, { rejectWithV
 // Call Api For Search  
 export const search = createAsyncThunk("search", async (query, { rejectWithValue }) => {
     try {
-        const apiurl = `products/search?q=${query}`
+        const apiurl = `${myendpoints[1]}${query}`
         const response = await axiosInstance.get(apiurl);
         console.log("Fetching Search Data", response);
         return response?.data?.products

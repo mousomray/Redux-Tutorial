@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // For React Query
 import Home from './Pages/Home'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,6 +17,8 @@ import Blog from './Pages/Blog';
 const App = () => {
 
   const dispatch = useDispatch();
+  const queryClient = new QueryClient();
+
   //check token avable or not
   function PrivateRoute({ children }) {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -33,7 +36,7 @@ const App = () => {
     },
     {
       path: '/blog',
-      component: <Blog/>
+      component: <Blog />
     }
 
   ]
@@ -59,30 +62,32 @@ const App = () => {
     <>
       <ToastContainer />
 
-      <Router>
-        <Routes>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Routes>
 
-          {/*Area of private routing*/}
-          {public_routing?.map((routing) => {
-            return (
-              <>
-                <Route path={routing?.path} element={routing?.component} />
-              </>
-            )
-          })}
+            {/*Area of private routing*/}
+            {public_routing?.map((routing) => {
+              return (
+                <>
+                  <Route path={routing?.path} element={routing?.component} />
+                </>
+              )
+            })}
 
 
-          {/*Area of public routing*/}
-          {private_routing?.map((routing) => {
-            return (
-              <>
-                <Route path={routing?.path} element={<PrivateRoute>{routing?.component}</PrivateRoute>} />
-              </>
-            )
-          })}
+            {/*Area of public routing*/}
+            {private_routing?.map((routing) => {
+              return (
+                <>
+                  <Route path={routing?.path} element={<PrivateRoute>{routing?.component}</PrivateRoute>} />
+                </>
+              )
+            })}
 
-        </Routes>
-      </Router>
+          </Routes>
+        </Router>
+      </QueryClientProvider>
     </>
   )
 }
